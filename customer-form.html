@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kleva - Formulario de Onboarding</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@300;400;500;600;700&family=IBM+Plex+Mono:ital,wght@0,400;0,500;1,300&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --clr-black: 0, 0, 0;
+            --clr-white: 255, 255, 255;
+            --clr-pink: 213, 51, 156;
+            --clr-gray: 192, 192, 192;
+            --font-mono: "IBM Plex Mono", monospace;
+            --font-sans: "Hanken Grotesk", sans-serif;
+            --bezier-expo: cubic-bezier(0.7, 0, 0.3, 1);
+        }
+
+        body {
+            font-family: var(--font-sans), sans-serif;
+            background-color: rgb(var(--clr-black));
+            color: rgb(var(--clr-white));
+            line-height: 1.6;
+            overflow-x: hidden;
+            padding: 48px 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.5),
+                inset 0 -1px 0 rgba(255, 255, 255, 0.1);
+            padding: 48px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .container::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.8), transparent);
+        }
+
+        .container::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 1px;
+            height: 100%;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.8), transparent, rgba(255, 255, 255, 0.3));
+        }
+
+        h1 {
+            font-family: var(--font-sans);
+            font-size: clamp(32px, 5vw, 48px);
+            font-weight: 300;
+            margin-bottom: 32px;
+            letter-spacing: -1px;
+            line-height: 1.1;
+            position: relative;
+        }
+
+        .success-message {
+            display: none;
+            text-align: center;
+            padding: 60px 40px;
+        }
+
+        .success-message.active {
+            display: block;
+        }
+
+        .success-message h2 {
+            font-size: 32px;
+            margin-bottom: 16px;
+            color: rgb(var(--clr-pink));
+        }
+
+        .success-message p {
+            font-size: 18px;
+            color: rgba(var(--clr-white), 0.7);
+        }
+
+        .section {
+            margin: 32px 0;
+            padding: 24px;
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3);
+            transition: all 0.25s var(--bezier-expo);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .section::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.6), transparent);
+        }
+
+        .section h2 {
+            color: rgb(var(--clr-white));
+            margin-top: 0;
+            font-family: var(--font-sans);
+            font-size: 24px;
+            font-weight: 400;
+            margin-bottom: 20px;
+            letter-spacing: -0.5px;
+        }
+
+        .field {
+            margin: 20px 0;
+        }
+
+        label {
+            display: block;
+            font-family: var(--font-mono);
+            font-weight: 500;
+            color: rgb(var(--clr-white));
+            margin-bottom: 8px;
+            font-size: 14px;
+            letter-spacing: 0.5px;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            font-size: 16px;
+            box-sizing: border-box;
+            background: rgba(255, 255, 255, 0.05);
+            color: rgb(var(--clr-white));
+            font-family: var(--font-sans);
+            transition: all 0.25s var(--bezier-expo);
+        }
+
+        input[type="text"]:focus,
+        input[type="email"]:focus,
+        textarea:focus,
+        select:focus {
+            outline: none;
+            border-color: rgb(var(--clr-pink));
+            background: rgba(255, 255, 255, 0.1);
+            box-shadow: 0 0 0 3px rgba(213, 51, 156, 0.15);
+        }
+
+        select {
+            cursor: pointer;
+        }
+
+        select option {
+            background: rgb(var(--clr-black));
+            color: rgb(var(--clr-white));
+        }
+
+        textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .checkbox-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            padding: 12px;
+            border-radius: 8px;
+            transition: all 0.25s var(--bezier-expo);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .checkbox-label:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .checkbox-label input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            accent-color: rgb(var(--clr-pink));
+        }
+
+        .checkbox-label span {
+            font-family: var(--font-sans);
+            font-size: 16px;
+            color: rgb(var(--clr-white));
+        }
+
+        input[type="file"] {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px dashed rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            font-size: 14px;
+            box-sizing: border-box;
+            background: rgba(255, 255, 255, 0.02);
+            color: rgb(var(--clr-white));
+            font-family: var(--font-mono);
+            transition: all 0.25s var(--bezier-expo);
+            cursor: pointer;
+        }
+
+        input[type="file"]:hover {
+            border-color: rgba(255, 255, 255, 0.5);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        input[type="file"]:focus {
+            outline: none;
+            border-color: rgb(var(--clr-pink));
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .btn-submit {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background-color: rgb(var(--clr-white));
+            color: rgb(var(--clr-black));
+            text-decoration: none;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            font-family: var(--font-mono);
+            line-height: 1.5;
+            letter-spacing: 1.6px;
+            text-transform: uppercase;
+            height: 44px;
+            padding: 10px 20px;
+            width: 100%;
+            margin-top: 32px;
+            transition: all 0.25s var(--bezier-expo);
+        }
+
+        .btn-submit:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-submit:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 24px 16px;
+            }
+
+            .container {
+                padding: 24px;
+            }
+
+            .section {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 32px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📋 Formulario de Onboarding</h1>
+
+        <div id="successMessage" class="success-message">
+            <h2>✓ Formulario Enviado</h2>
+            <p>Gracias por completar el formulario. Nos pondremos en contacto pronto.</p>
+        </div>
+
+        <form id="customerForm" style="display: block;">
+            <div class="section">
+                <h2>1. Información del Cliente</h2>
+                <div class="field">
+                    <label>Nombre de la Empresa:</label>
+                    <input type="text" name="empresa" required>
+                </div>
+                <div class="field">
+                    <label>Contacto Principal:</label>
+                    <input type="text" name="contacto" required>
+                </div>
+                <div class="field">
+                    <label>Email:</label>
+                    <input type="email" name="email" required>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>2. Caso de Uso y Tipo de Mora</h2>
+                <div class="field">
+                    <label>Caso de Uso:</label>
+                    <textarea name="caso_uso" placeholder="Describa el caso de uso principal..." required></textarea>
+                </div>
+                <div class="field">
+                    <label>Tipo de Mora (seleccione todos los que apliquen):</label>
+                    <div class="checkbox-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="tipo_mora" value="Pre-mora">
+                            <span>Pre-mora</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="tipo_mora" value="Mora Temprana">
+                            <span>Mora Temprana</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="tipo_mora" value="Mora Tardía">
+                            <span>Mora Tardía</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="tipo_mora" value="Cobranza Judicial">
+                            <span>Cobranza Judicial</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="tipo_mora" value="Otro">
+                            <span>Otro</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>3. Flujo de Conversación</h2>
+                <div class="field">
+                    <label>Descripción del Flujo:</label>
+                    <textarea name="flujo_conversacion" placeholder="Describa cómo debe ser el flujo de la conversación con el deudor..." required></textarea>
+                </div>
+                <div class="field">
+                    <label>Tono de la Conversación (seleccione todos los que apliquen):</label>
+                    <div class="checkbox-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="tono" value="Formal">
+                            <span>Formal</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="tono" value="Amigable">
+                            <span>Amigable</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="tono" value="Empático">
+                            <span>Empático</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="tono" value="Firme">
+                            <span>Firme</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="tono" value="Profesional">
+                            <span>Profesional</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>4. Canales</h2>
+                <div class="field">
+                    <label>Canales Requeridos (seleccione todos los que apliquen):</label>
+                    <div class="checkbox-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="canal" value="Agente de Voz">
+                            <span>Agente de Voz</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="canal" value="Chat">
+                            <span>Chat</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="canal" value="WhatsApp">
+                            <span>WhatsApp</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="canal" value="SMS">
+                            <span>SMS</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>5. Carga de Contactos</h2>
+                <div class="field">
+                    <label>Método de Carga:</label>
+                    <select name="metodo_carga" required>
+                        <option value="">Seleccione...</option>
+                        <option value="Excel">Excel</option>
+                        <option value="CSV">CSV</option>
+                        <option value="HTTP Request (API)">HTTP Request (API)</option>
+                        <option value="Otro">Otro</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label>Datos por Contacto (campos incluidos):</label>
+                    <textarea name="datos_contacto" placeholder="Ejemplo: Nombre, Apellido, Teléfono, Monto Adeudado, Días de Mora, etc." required></textarea>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>6. Post-Conversación</h2>
+                <div class="field">
+                    <label>¿Qué debe ocurrir al finalizar la conversación?</label>
+                    <textarea name="post_conversacion" placeholder="Ejemplo: Enviar reporte, actualizar CRM, generar ticket, etc." required></textarea>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>7. Ubicación</h2>
+                <div class="field">
+                    <label>País:</label>
+                    <input type="text" name="pais" required>
+                </div>
+                <div class="field">
+                    <label>Región/Ciudad:</label>
+                    <input type="text" name="region" required>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>8. Telefonía</h2>
+                <div class="field">
+                    <label>Proveedor de Telefonía:</label>
+                    <select name="proveedor_telefonia" required>
+                        <option value="">Seleccione...</option>
+                        <option value="Kleva provee">Kleva provee</option>
+                        <option value="Cliente provee">Cliente provee</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label>Si el cliente provee, ¿cuál utilizan?</label>
+                    <input type="text" name="telefonia_cliente" placeholder="Twilio, Vonage, etc.">
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>9. Requerimientos Especiales</h2>
+                <div class="field">
+                    <label>¿Existen requerimientos o solicitudes especiales?</label>
+                    <textarea name="requerimientos_especiales" placeholder="Integraciones específicas, cumplimiento normativo, horarios, idiomas, etc."></textarea>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>10. Grabaciones de Llamadas (Opcional)</h2>
+                <div class="field">
+                    <label>Subir grabaciones de ejemplo:</label>
+                    <input type="file" name="call_recordings" id="call_recordings" accept="audio/*,video/*" multiple>
+                    <p style="font-size: 12px; color: rgba(255, 255, 255, 0.6); margin-top: 8px; font-family: var(--font-mono);">
+                        Formatos soportados: MP3, WAV, M4A, MP4. Máximo 10 archivos.
+                    </p>
+                </div>
+            </div>
+
+            <button type="submit" id="submitBtn" class="btn-submit">Enviar Formulario</button>
+        </form>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        const SUPABASE_URL = 'https://kxlyqskujfgmhyexvlxy.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt4bHlxc2t1amZnbWh5ZXh2bHh5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkzNjc0ODAsImV4cCI6MjA3NDk0MzQ4MH0.0P8HPlV_aEyNyoX3htB6wxQUYEaulCpSI8Nc1XPf_Hg';
+
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // Upload files
+        async function uploadFiles(files, customerId) {
+            const uploadedFiles = [];
+
+            for (const file of files) {
+                const fileName = `${customerId}/${Date.now()}_${file.name}`;
+
+                try {
+                    const { data, error } = await supabase.storage
+                        .from('call-recordings')
+                        .upload(fileName, file);
+
+                    if (error) throw error;
+
+                    const { data: { publicUrl } } = supabase.storage
+                        .from('call-recordings')
+                        .getPublicUrl(fileName);
+
+                    uploadedFiles.push({
+                        name: file.name,
+                        url: publicUrl,
+                        path: fileName
+                    });
+                } catch (error) {
+                    console.error('Error uploading file:', file.name, error);
+                }
+            }
+
+            return uploadedFiles;
+        }
+
+        // Form submit
+        document.getElementById('customerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Enviando...';
+
+            const formData = new FormData(e.target);
+            const tiposMora = formData.getAll('tipo_mora');
+            const tono = formData.getAll('tono');
+            const canales = formData.getAll('canal');
+
+            const data = {
+                empresa: formData.get('empresa'),
+                contacto: formData.get('contacto'),
+                email: formData.get('email'),
+                caso_uso: formData.get('caso_uso'),
+                tipos_mora: tiposMora,
+                flujo_conversacion: formData.get('flujo_conversacion'),
+                tono: tono,
+                canales: canales,
+                metodo_carga: formData.get('metodo_carga'),
+                datos_contacto: formData.get('datos_contacto'),
+                post_conversacion: formData.get('post_conversacion'),
+                pais: formData.get('pais'),
+                region: formData.get('region'),
+                proveedor_telefonia: formData.get('proveedor_telefonia'),
+                telefonia_cliente: formData.get('telefonia_cliente'),
+                requerimientos_especiales: formData.get('requerimientos_especiales'),
+                is_public_submission: true
+            };
+
+            try {
+                // Insert customer data
+                const { data: newData, error } = await supabase
+                    .from('customer_onboarding')
+                    .insert([data])
+                    .select()
+                    .single();
+
+                if (error) throw error;
+
+                // Handle file uploads
+                const fileInput = document.getElementById('call_recordings');
+                if (fileInput.files.length > 0) {
+                    const files = Array.from(fileInput.files).slice(0, 10);
+                    const uploadedFiles = await uploadFiles(files, newData.id);
+
+                    if (uploadedFiles.length > 0) {
+                        await supabase
+                            .from('customer_onboarding')
+                            .update({ call_recordings: uploadedFiles })
+                            .eq('id', newData.id);
+                    }
+                }
+
+                // Show success message
+                document.getElementById('customerForm').style.display = 'none';
+                document.getElementById('successMessage').classList.add('active');
+
+            } catch (error) {
+                console.error('Error submitting form:', error);
+                alert('Error al enviar el formulario: ' + error.message);
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Enviar Formulario';
+            }
+        });
+    </script>
+</body>
+</html>

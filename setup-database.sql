@@ -39,6 +39,7 @@ CREATE TABLE IF NOT EXISTS customer_onboarding (
   telefonia_cliente TEXT,
   requerimientos_especiales TEXT,
   call_recordings JSONB DEFAULT '[]'::jsonb, -- Array of {name, url, path}
+  is_public_submission BOOLEAN DEFAULT false, -- Track if submitted via public form
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
@@ -52,6 +53,9 @@ ADD COLUMN IF NOT EXISTS call_recordings JSONB DEFAULT '[]'::jsonb;
 
 ALTER TABLE customer_onboarding
 ADD COLUMN IF NOT EXISTS tono TEXT[];
+
+ALTER TABLE customer_onboarding
+ADD COLUMN IF NOT EXISTS is_public_submission BOOLEAN DEFAULT false;
 
 -- Enable Row Level Security
 ALTER TABLE customer_onboarding ENABLE ROW LEVEL SECURITY;

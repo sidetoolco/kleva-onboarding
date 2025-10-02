@@ -504,6 +504,7 @@
                 <p>Customer Management</p>
             </div>
             <button class="btn-new-customer" onclick="showNewForm()">+ New Customer</button>
+            <button class="btn-new-customer" onclick="copyCustomerFormURL()" style="background: rgba(213, 51, 156, 0.2); border: 1px solid rgb(var(--clr-pink)); margin-top: 12px;">📋 Copy Form URL</button>
             <ul class="customer-list" id="customerList">
                 <li class="loading">Loading customers...</li>
             </ul>
@@ -1167,6 +1168,19 @@
                 view.classList.remove('active');
             });
             document.getElementById(viewId).classList.add('active');
+        }
+
+        // Copy customer form URL
+        function copyCustomerFormURL() {
+            const baseURL = window.location.origin + window.location.pathname.replace('customer-onboarding-app.html', '');
+            const formURL = baseURL + 'customer-form.html';
+
+            navigator.clipboard.writeText(formURL).then(() => {
+                alert('✅ URL del formulario copiada al portapapeles!\n\n' + formURL);
+            }).catch(err => {
+                console.error('Error copying URL:', err);
+                alert('URL del formulario:\n\n' + formURL);
+            });
         }
     </script>
 </body>
