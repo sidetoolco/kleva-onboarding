@@ -25,7 +25,7 @@ CREATE TABLE IF NOT EXISTS customer_onboarding (
   contacto TEXT NOT NULL,
   email TEXT NOT NULL,
   caso_uso TEXT NOT NULL,
-  tipo_mora TEXT, -- Kept for backward compatibility
+  tipo_mora TEXT, -- Kept for backward compatibility, now nullable
   tipos_mora TEXT[], -- New field for multiple selections
   flujo_conversacion TEXT NOT NULL,
   tono TEXT[], -- Conversation tone options
@@ -56,6 +56,10 @@ ADD COLUMN IF NOT EXISTS tono TEXT[];
 
 ALTER TABLE customer_onboarding
 ADD COLUMN IF NOT EXISTS is_public_submission BOOLEAN DEFAULT false;
+
+-- Make tipo_mora nullable for backward compatibility with new array-based field
+ALTER TABLE customer_onboarding
+ALTER COLUMN tipo_mora DROP NOT NULL;
 
 -- Enable Row Level Security
 ALTER TABLE customer_onboarding ENABLE ROW LEVEL SECURITY;
