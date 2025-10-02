@@ -1,0 +1,1173 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kleva - Customer Onboarding</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@300;400;500;600;700&family=IBM+Plex+Mono:ital,wght@0,400;0,500;1,300&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --clr-black: 0, 0, 0;
+            --clr-white: 255, 255, 255;
+            --clr-pink: 213, 51, 156;
+            --clr-gray: 192, 192, 192;
+            --font-mono: "IBM Plex Mono", monospace;
+            --font-sans: "Hanken Grotesk", sans-serif;
+            --bezier-expo: cubic-bezier(0.7, 0, 0.3, 1);
+        }
+
+        body {
+            font-family: var(--font-sans), sans-serif;
+            background-color: rgb(var(--clr-black));
+            color: rgb(var(--clr-white));
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .app-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 320px;
+            background: rgba(255, 255, 255, 0.02);
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 24px;
+            overflow-y: auto;
+            transition: all 0.25s var(--bezier-expo);
+        }
+
+        .sidebar-header {
+            margin-bottom: 32px;
+        }
+
+        .sidebar-header h1 {
+            font-family: var(--font-sans);
+            font-size: 24px;
+            font-weight: 300;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
+
+        .sidebar-header p {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            color: rgba(var(--clr-white), 0.6);
+            letter-spacing: 0.5px;
+        }
+
+        .btn-new-customer {
+            width: 100%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background-color: rgb(var(--clr-white));
+            color: rgb(var(--clr-black));
+            text-decoration: none;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            font-family: var(--font-mono);
+            line-height: 1.5;
+            letter-spacing: 1.2px;
+            text-transform: uppercase;
+            height: 44px;
+            padding: 10px 20px;
+            margin-bottom: 24px;
+            transition: all 0.25s var(--bezier-expo);
+        }
+
+        .btn-new-customer:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(255, 255, 255, 0.2);
+        }
+
+        .customer-list {
+            list-style: none;
+        }
+
+        .customer-item {
+            padding: 16px;
+            margin-bottom: 8px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.02);
+            cursor: pointer;
+            transition: all 0.25s var(--bezier-expo);
+        }
+
+        .customer-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.2);
+            transform: translateX(4px);
+        }
+
+        .customer-item.active {
+            background: rgba(213, 51, 156, 0.1);
+            border-color: rgb(var(--clr-pink));
+        }
+
+        .customer-item h3 {
+            font-family: var(--font-sans);
+            font-size: 16px;
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+
+        .customer-item p {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            color: rgba(var(--clr-white), 0.6);
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 48px;
+            overflow-y: auto;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .view-mode {
+            display: none;
+        }
+
+        .view-mode.active {
+            display: block;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 120px 40px;
+        }
+
+        .empty-state h2 {
+            font-family: var(--font-sans);
+            font-size: 32px;
+            font-weight: 300;
+            margin-bottom: 16px;
+            letter-spacing: -0.5px;
+        }
+
+        .empty-state p {
+            color: rgba(var(--clr-white), 0.6);
+            font-size: 16px;
+        }
+
+        /* Form Styles */
+        h1 {
+            font-family: var(--font-sans);
+            font-size: clamp(32px, 5vw, 48px);
+            font-weight: 300;
+            margin-bottom: 32px;
+            letter-spacing: -1px;
+            line-height: 1.1;
+        }
+
+        .section {
+            margin: 32px 0;
+            padding: 24px;
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3);
+            transition: all 0.25s var(--bezier-expo);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .section::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.6), transparent);
+        }
+
+        .section h2 {
+            color: rgb(var(--clr-white));
+            margin-top: 0;
+            font-family: var(--font-sans);
+            font-size: 24px;
+            font-weight: 400;
+            margin-bottom: 20px;
+            letter-spacing: -0.5px;
+        }
+
+        .field {
+            margin: 20px 0;
+        }
+
+        label {
+            display: block;
+            font-family: var(--font-mono);
+            font-weight: 500;
+            color: rgb(var(--clr-white));
+            margin-bottom: 8px;
+            font-size: 14px;
+            letter-spacing: 0.5px;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            font-size: 16px;
+            box-sizing: border-box;
+            background: rgba(255, 255, 255, 0.05);
+            color: rgb(var(--clr-white));
+            font-family: var(--font-sans);
+            transition: all 0.25s var(--bezier-expo);
+        }
+
+        input[type="text"]:focus,
+        input[type="email"]:focus,
+        textarea:focus,
+        select:focus {
+            outline: none;
+            border-color: rgb(var(--clr-pink));
+            background: rgba(255, 255, 255, 0.1);
+            box-shadow: 0 0 0 3px rgba(213, 51, 156, 0.15);
+        }
+
+        textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .checkbox-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            padding: 12px;
+            border-radius: 8px;
+            transition: all 0.25s var(--bezier-expo);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .checkbox-label:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .checkbox-label input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            accent-color: rgb(var(--clr-pink));
+        }
+
+        .checkbox-label span {
+            font-family: var(--font-sans);
+            font-size: 16px;
+            color: rgb(var(--clr-white));
+        }
+
+        /* File Upload */
+        input[type="file"] {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px dashed rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            font-size: 14px;
+            box-sizing: border-box;
+            background: rgba(255, 255, 255, 0.02);
+            color: rgb(var(--clr-white));
+            font-family: var(--font-mono);
+            transition: all 0.25s var(--bezier-expo);
+            cursor: pointer;
+        }
+
+        input[type="file"]:hover {
+            border-color: rgba(255, 255, 255, 0.5);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        input[type="file"]:focus {
+            outline: none;
+            border-color: rgb(var(--clr-pink));
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .file-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px;
+            margin-top: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            font-family: var(--font-mono);
+            font-size: 14px;
+        }
+
+        .file-item-name {
+            flex: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            margin-right: 12px;
+        }
+
+        .file-item-remove {
+            background: rgba(255, 0, 0, 0.2);
+            border: 1px solid rgba(255, 0, 0, 0.4);
+            color: rgb(var(--clr-white));
+            padding: 4px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.25s var(--bezier-expo);
+        }
+
+        .file-item-remove:hover {
+            background: rgba(255, 0, 0, 0.3);
+        }
+
+        .file-item-link {
+            color: rgb(var(--clr-pink));
+            text-decoration: none;
+            margin-right: 12px;
+            font-size: 12px;
+        }
+
+        .file-item-link:hover {
+            text-decoration: underline;
+        }
+
+        /* Buttons */
+        .form-actions {
+            display: flex;
+            gap: 16px;
+            margin-top: 32px;
+        }
+
+        .btn-primary, .btn-secondary, .btn-danger {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            font-family: var(--font-mono);
+            line-height: 1.5;
+            letter-spacing: 1.2px;
+            text-transform: uppercase;
+            height: 44px;
+            padding: 10px 20px;
+            transition: all 0.25s var(--bezier-expo);
+            flex: 1;
+        }
+
+        .btn-primary {
+            background-color: rgb(var(--clr-white));
+            color: rgb(var(--clr-black));
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.05);
+            color: rgb(var(--clr-white));
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .btn-danger {
+            background: rgba(255, 0, 0, 0.1);
+            color: rgb(var(--clr-white));
+            border: 1px solid rgba(255, 0, 0, 0.3);
+        }
+
+        .btn-danger:hover {
+            background: rgba(255, 0, 0, 0.2);
+            border-color: rgba(255, 0, 0, 0.5);
+        }
+
+        /* View Mode */
+        .view-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+        }
+
+        .view-data {
+            display: grid;
+            gap: 24px;
+        }
+
+        .data-group h3 {
+            font-family: var(--font-sans);
+            font-size: 20px;
+            font-weight: 400;
+            margin-bottom: 16px;
+            color: rgb(var(--clr-pink));
+        }
+
+        .data-field {
+            margin-bottom: 16px;
+        }
+
+        .data-field label {
+            font-size: 12px;
+            color: rgba(var(--clr-white), 0.6);
+            margin-bottom: 4px;
+        }
+
+        .data-field p {
+            font-family: var(--font-sans);
+            font-size: 16px;
+            color: rgb(var(--clr-white));
+        }
+
+        /* Loading State */
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: rgba(var(--clr-white), 0.6);
+            font-family: var(--font-mono);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .app-container {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                border-right: none;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+                max-height: 300px;
+            }
+
+            .main-content {
+                padding: 24px 16px;
+            }
+
+            .form-actions {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h1>Kleva Onboarding</h1>
+                <p>Customer Management</p>
+            </div>
+            <button class="btn-new-customer" onclick="showNewForm()">+ New Customer</button>
+            <ul class="customer-list" id="customerList">
+                <li class="loading">Loading customers...</li>
+            </ul>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="container">
+                <!-- Empty State -->
+                <div id="emptyState" class="view-mode active">
+                    <div class="empty-state">
+                        <h2>Welcome to Kleva Onboarding</h2>
+                        <p>Select a customer from the list or create a new one to get started.</p>
+                    </div>
+                </div>
+
+                <!-- Form View -->
+                <div id="formView" class="view-mode">
+                    <h1 id="formTitle">New Customer Onboarding</h1>
+                    <form id="onboardingForm">
+                        <input type="hidden" id="customerId" name="id">
+
+                        <div class="section">
+                            <h2>1. Información del Cliente</h2>
+                            <div class="field">
+                                <label>Nombre de la Empresa:</label>
+                                <input type="text" name="empresa" id="empresa" required>
+                            </div>
+                            <div class="field">
+                                <label>Contacto Principal:</label>
+                                <input type="text" name="contacto" id="contacto" required>
+                            </div>
+                            <div class="field">
+                                <label>Email:</label>
+                                <input type="email" name="email" id="email" required>
+                            </div>
+                        </div>
+
+                        <div class="section">
+                            <h2>2. Caso de Uso y Tipo de Mora</h2>
+                            <div class="field">
+                                <label>Caso de Uso:</label>
+                                <textarea name="caso_uso" id="caso_uso" placeholder="Describa el caso de uso principal..." required></textarea>
+                            </div>
+                            <div class="field">
+                                <label>Tipo de Mora (seleccione todos los que apliquen):</label>
+                                <div class="checkbox-group" id="tipoMoraGroup">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="tipo_mora" value="Pre-mora">
+                                        <span>Pre-mora</span>
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="tipo_mora" value="Mora Temprana">
+                                        <span>Mora Temprana</span>
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="tipo_mora" value="Mora Tardía">
+                                        <span>Mora Tardía</span>
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="tipo_mora" value="Cobranza Judicial">
+                                        <span>Cobranza Judicial</span>
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="tipo_mora" value="Otro">
+                                        <span>Otro</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="section">
+                            <h2>3. Flujo de Conversación</h2>
+                            <div class="field">
+                                <label>Descripción del Flujo:</label>
+                                <textarea name="flujo_conversacion" id="flujo_conversacion" placeholder="Describa cómo debe ser el flujo de la conversación con el deudor..." required></textarea>
+                            </div>
+                            <div class="field">
+                                <label>Tono de la Conversación (seleccione todos los que apliquen):</label>
+                                <div class="checkbox-group" id="tonoGroup">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="tono" value="Formal">
+                                        <span>Formal</span>
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="tono" value="Amigable">
+                                        <span>Amigable</span>
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="tono" value="Empático">
+                                        <span>Empático</span>
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="tono" value="Firme">
+                                        <span>Firme</span>
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="tono" value="Profesional">
+                                        <span>Profesional</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="section">
+                            <h2>4. Canales</h2>
+                            <div class="field">
+                                <label>Canales Requeridos (seleccione todos los que apliquen):</label>
+                                <div class="checkbox-group" id="canalGroup">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="canal" value="Agente de Voz">
+                                        <span>Agente de Voz</span>
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="canal" value="Chat">
+                                        <span>Chat</span>
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="canal" value="WhatsApp">
+                                        <span>WhatsApp</span>
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="canal" value="SMS">
+                                        <span>SMS</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="section">
+                            <h2>5. Carga de Contactos</h2>
+                            <div class="field">
+                                <label>Método de Carga:</label>
+                                <select name="metodo_carga" id="metodo_carga" required>
+                                    <option value="">Seleccione...</option>
+                                    <option value="Excel">Excel</option>
+                                    <option value="CSV">CSV</option>
+                                    <option value="HTTP Request (API)">HTTP Request (API)</option>
+                                    <option value="Otro">Otro</option>
+                                </select>
+                            </div>
+                            <div class="field">
+                                <label>Datos por Contacto (campos incluidos):</label>
+                                <textarea name="datos_contacto" id="datos_contacto" placeholder="Ejemplo: Nombre, Apellido, Teléfono, Monto Adeudado, Días de Mora, etc." required></textarea>
+                            </div>
+                        </div>
+
+                        <div class="section">
+                            <h2>6. Post-Conversación</h2>
+                            <div class="field">
+                                <label>¿Qué debe ocurrir al finalizar la conversación?</label>
+                                <textarea name="post_conversacion" id="post_conversacion" placeholder="Ejemplo: Enviar reporte, actualizar CRM, generar ticket, etc." required></textarea>
+                            </div>
+                        </div>
+
+                        <div class="section">
+                            <h2>7. Ubicación</h2>
+                            <div class="field">
+                                <label>País:</label>
+                                <input type="text" name="pais" id="pais" required>
+                            </div>
+                            <div class="field">
+                                <label>Región/Ciudad:</label>
+                                <input type="text" name="region" id="region" required>
+                            </div>
+                        </div>
+
+                        <div class="section">
+                            <h2>8. Telefonía</h2>
+                            <div class="field">
+                                <label>Proveedor de Telefonía:</label>
+                                <select name="proveedor_telefonia" id="proveedor_telefonia" required>
+                                    <option value="">Seleccione...</option>
+                                    <option value="Kleva provee">Kleva provee</option>
+                                    <option value="Cliente provee">Cliente provee</option>
+                                </select>
+                            </div>
+                            <div class="field">
+                                <label>Si el cliente provee, ¿cuál utilizan?</label>
+                                <input type="text" name="telefonia_cliente" id="telefonia_cliente" placeholder="Twilio, Vonage, etc.">
+                            </div>
+                        </div>
+
+                        <div class="section">
+                            <h2>9. Requerimientos Especiales</h2>
+                            <div class="field">
+                                <label>¿Existen requerimientos o solicitudes especiales?</label>
+                                <textarea name="requerimientos_especiales" id="requerimientos_especiales" placeholder="Integraciones específicas, cumplimiento normativo, horarios, idiomas, etc."></textarea>
+                            </div>
+                        </div>
+
+                        <div class="section">
+                            <h2>10. Grabaciones de Llamadas (Opcional)</h2>
+                            <div class="field">
+                                <label>Subir grabaciones de ejemplo:</label>
+                                <input type="file" name="call_recordings" id="call_recordings" accept="audio/*,video/*" multiple>
+                                <p style="font-size: 12px; color: rgba(255, 255, 255, 0.6); margin-top: 8px; font-family: var(--font-mono);">
+                                    Formatos soportados: MP3, WAV, M4A, MP4. Máximo 10 archivos.
+                                </p>
+                                <div id="uploadedFiles" style="margin-top: 16px;"></div>
+                            </div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn-primary">Save Customer</button>
+                            <button type="button" class="btn-secondary" onclick="cancelForm()">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- View Mode -->
+                <div id="viewMode" class="view-mode">
+                    <div class="view-header">
+                        <h1 id="viewTitle">Customer Details</h1>
+                        <div style="display: flex; gap: 12px;">
+                            <button class="btn-secondary" onclick="editCustomer()">Edit</button>
+                            <button class="btn-danger" onclick="deleteCustomer()">Delete</button>
+                        </div>
+                    </div>
+                    <div id="viewContent" class="view-data">
+                        <!-- Content populated by JS -->
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        // Supabase Configuration
+        const SUPABASE_URL = 'https://kxlyqskujfgmhyexvlxy.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt4bHlxc2t1amZnbWh5ZXh2bHh5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkzNjc0ODAsImV4cCI6MjA3NDk0MzQ4MH0.0P8HPlV_aEyNyoX3htB6wxQUYEaulCpSI8Nc1XPf_Hg';
+
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        let currentCustomerId = null;
+        let customers = [];
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', async () => {
+            await loadCustomers();
+            setupFormSubmit();
+        });
+
+        // Load all customers
+        async function loadCustomers() {
+            try {
+                const { data, error } = await supabase
+                    .from('customer_onboarding')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+
+                customers = data || [];
+                renderCustomerList();
+            } catch (error) {
+                console.error('Error loading customers:', error);
+                document.getElementById('customerList').innerHTML =
+                    '<li style="padding: 16px; color: rgba(255, 255, 255, 0.6);">Error loading customers</li>';
+            }
+        }
+
+        // Render customer list
+        function renderCustomerList() {
+            const listEl = document.getElementById('customerList');
+
+            if (customers.length === 0) {
+                listEl.innerHTML = '<li style="padding: 16px; color: rgba(255, 255, 255, 0.6);">No customers yet</li>';
+                return;
+            }
+
+            listEl.innerHTML = customers.map(customer => `
+                <li class="customer-item ${currentCustomerId === customer.id ? 'active' : ''}"
+                    onclick="viewCustomer(${customer.id})">
+                    <h3>${customer.empresa}</h3>
+                    <p>${customer.contacto}</p>
+                </li>
+            `).join('');
+        }
+
+        // Show new form
+        function showNewForm() {
+            currentCustomerId = null;
+            document.getElementById('formTitle').textContent = 'New Customer Onboarding';
+            document.getElementById('onboardingForm').reset();
+            document.getElementById('customerId').value = '';
+
+            showView('formView');
+            renderCustomerList();
+        }
+
+        // View customer details
+        async function viewCustomer(id) {
+            currentCustomerId = id;
+            const customer = customers.find(c => c.id === id);
+
+            if (!customer) return;
+
+            document.getElementById('viewTitle').textContent = customer.empresa;
+
+            const canales = customer.canales ? customer.canales.join(', ') : 'N/A';
+            const tiposMora = customer.tipos_mora ? customer.tipos_mora.join(', ') : customer.tipo_mora || 'N/A';
+
+            document.getElementById('viewContent').innerHTML = `
+                <div class="section">
+                    <div class="data-group">
+                        <h3>Información del Cliente</h3>
+                        <div class="data-field">
+                            <label>Empresa</label>
+                            <p>${customer.empresa}</p>
+                        </div>
+                        <div class="data-field">
+                            <label>Contacto Principal</label>
+                            <p>${customer.contacto}</p>
+                        </div>
+                        <div class="data-field">
+                            <label>Email</label>
+                            <p>${customer.email}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <div class="data-group">
+                        <h3>Caso de Uso y Tipo de Mora</h3>
+                        <div class="data-field">
+                            <label>Caso de Uso</label>
+                            <p>${customer.caso_uso}</p>
+                        </div>
+                        <div class="data-field">
+                            <label>Tipo de Mora</label>
+                            <p>${tiposMora}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <div class="data-group">
+                        <h3>Flujo de Conversación</h3>
+                        <div class="data-field">
+                            <label>Descripción del Flujo</label>
+                            <p>${customer.flujo_conversacion}</p>
+                        </div>
+                        ${customer.tono && customer.tono.length > 0 ? `
+                        <div class="data-field">
+                            <label>Tono de la Conversación</label>
+                            <p>${customer.tono.join(', ')}</p>
+                        </div>
+                        ` : ''}
+                    </div>
+                </div>
+
+                <div class="section">
+                    <div class="data-group">
+                        <h3>Canales</h3>
+                        <div class="data-field">
+                            <label>Canales Requeridos</label>
+                            <p>${canales}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <div class="data-group">
+                        <h3>Carga de Contactos</h3>
+                        <div class="data-field">
+                            <label>Método de Carga</label>
+                            <p>${customer.metodo_carga}</p>
+                        </div>
+                        <div class="data-field">
+                            <label>Datos por Contacto</label>
+                            <p>${customer.datos_contacto}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <div class="data-group">
+                        <h3>Post-Conversación</h3>
+                        <div class="data-field">
+                            <label>Acciones Post-Conversación</label>
+                            <p>${customer.post_conversacion}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <div class="data-group">
+                        <h3>Ubicación</h3>
+                        <div class="data-field">
+                            <label>País</label>
+                            <p>${customer.pais}</p>
+                        </div>
+                        <div class="data-field">
+                            <label>Región/Ciudad</label>
+                            <p>${customer.region}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <div class="data-group">
+                        <h3>Telefonía</h3>
+                        <div class="data-field">
+                            <label>Proveedor de Telefonía</label>
+                            <p>${customer.proveedor_telefonia}</p>
+                        </div>
+                        ${customer.telefonia_cliente ? `
+                        <div class="data-field">
+                            <label>Telefonía del Cliente</label>
+                            <p>${customer.telefonia_cliente}</p>
+                        </div>
+                        ` : ''}
+                    </div>
+                </div>
+
+                ${customer.requerimientos_especiales ? `
+                <div class="section">
+                    <div class="data-group">
+                        <h3>Requerimientos Especiales</h3>
+                        <div class="data-field">
+                            <p>${customer.requerimientos_especiales}</p>
+                        </div>
+                    </div>
+                </div>
+                ` : ''}
+
+                ${customer.call_recordings && customer.call_recordings.length > 0 ? `
+                <div class="section">
+                    <div class="data-group">
+                        <h3>Grabaciones de Llamadas</h3>
+                        ${customer.call_recordings.map(rec => `
+                            <div class="file-item">
+                                <span class="file-item-name">${rec.name}</span>
+                                <a href="${rec.url}" target="_blank" class="file-item-link">Descargar</a>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+                ` : ''}
+            `;
+
+            showView('viewMode');
+            renderCustomerList();
+        }
+
+        // Edit customer
+        function editCustomer() {
+            const customer = customers.find(c => c.id === currentCustomerId);
+            if (!customer) return;
+
+            document.getElementById('formTitle').textContent = `Edit ${customer.empresa}`;
+            document.getElementById('customerId').value = customer.id;
+
+            // Populate form fields
+            document.getElementById('empresa').value = customer.empresa;
+            document.getElementById('contacto').value = customer.contacto;
+            document.getElementById('email').value = customer.email;
+            document.getElementById('caso_uso').value = customer.caso_uso;
+            document.getElementById('flujo_conversacion').value = customer.flujo_conversacion;
+            document.getElementById('metodo_carga').value = customer.metodo_carga;
+            document.getElementById('datos_contacto').value = customer.datos_contacto;
+            document.getElementById('post_conversacion').value = customer.post_conversacion;
+            document.getElementById('pais').value = customer.pais;
+            document.getElementById('region').value = customer.region;
+            document.getElementById('proveedor_telefonia').value = customer.proveedor_telefonia;
+            document.getElementById('telefonia_cliente').value = customer.telefonia_cliente || '';
+            document.getElementById('requerimientos_especiales').value = customer.requerimientos_especiales || '';
+
+            // Set canal checkboxes
+            const canalCheckboxes = document.querySelectorAll('input[name="canal"]');
+            canalCheckboxes.forEach(cb => {
+                cb.checked = customer.canales && customer.canales.includes(cb.value);
+            });
+
+            // Set tipo_mora checkboxes
+            const tipoMoraCheckboxes = document.querySelectorAll('input[name="tipo_mora"]');
+            tipoMoraCheckboxes.forEach(cb => {
+                cb.checked = (customer.tipos_mora && customer.tipos_mora.includes(cb.value)) ||
+                            (customer.tipo_mora && cb.value === customer.tipo_mora);
+            });
+
+            // Set tono checkboxes
+            const tonoCheckboxes = document.querySelectorAll('input[name="tono"]');
+            tonoCheckboxes.forEach(cb => {
+                cb.checked = customer.tono && customer.tono.includes(cb.value);
+            });
+
+            // Display existing recordings
+            displayExistingRecordings(customer.call_recordings || []);
+
+            showView('formView');
+        }
+
+        // Delete customer
+        async function deleteCustomer() {
+            if (!currentCustomerId) return;
+
+            if (!confirm('Are you sure you want to delete this customer?')) return;
+
+            try {
+                const { error } = await supabase
+                    .from('customer_onboarding')
+                    .delete()
+                    .eq('id', currentCustomerId);
+
+                if (error) throw error;
+
+                currentCustomerId = null;
+                await loadCustomers();
+                showView('emptyState');
+            } catch (error) {
+                console.error('Error deleting customer:', error);
+                alert('Error deleting customer: ' + error.message);
+            }
+        }
+
+        // Cancel form
+        function cancelForm() {
+            if (currentCustomerId) {
+                viewCustomer(currentCustomerId);
+            } else {
+                showView('emptyState');
+            }
+        }
+
+        // Upload files to Supabase Storage
+        async function uploadFiles(files, customerId) {
+            const uploadedFiles = [];
+
+            for (const file of files) {
+                const fileName = `${customerId}/${Date.now()}_${file.name}`;
+
+                try {
+                    const { data, error } = await supabase.storage
+                        .from('call-recordings')
+                        .upload(fileName, file);
+
+                    if (error) throw error;
+
+                    const { data: { publicUrl } } = supabase.storage
+                        .from('call-recordings')
+                        .getPublicUrl(fileName);
+
+                    uploadedFiles.push({
+                        name: file.name,
+                        url: publicUrl,
+                        path: fileName
+                    });
+                } catch (error) {
+                    console.error('Error uploading file:', file.name, error);
+                }
+            }
+
+            return uploadedFiles;
+        }
+
+        // Display existing recordings
+        function displayExistingRecordings(recordings) {
+            const container = document.getElementById('uploadedFiles');
+            if (!recordings || recordings.length === 0) {
+                container.innerHTML = '';
+                return;
+            }
+
+            container.innerHTML = recordings.map(rec => `
+                <div class="file-item">
+                    <span class="file-item-name">${rec.name}</span>
+                    <a href="${rec.url}" target="_blank" class="file-item-link">Ver</a>
+                </div>
+            `).join('');
+        }
+
+        // Setup form submit
+        function setupFormSubmit() {
+            document.getElementById('onboardingForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+
+                const formData = new FormData(e.target);
+                const canales = formData.getAll('canal');
+                const tiposMora = formData.getAll('tipo_mora');
+                const tono = formData.getAll('tono');
+
+                const data = {
+                    empresa: formData.get('empresa'),
+                    contacto: formData.get('contacto'),
+                    email: formData.get('email'),
+                    caso_uso: formData.get('caso_uso'),
+                    tipos_mora: tiposMora,
+                    flujo_conversacion: formData.get('flujo_conversacion'),
+                    tono: tono,
+                    canales: canales,
+                    metodo_carga: formData.get('metodo_carga'),
+                    datos_contacto: formData.get('datos_contacto'),
+                    post_conversacion: formData.get('post_conversacion'),
+                    pais: formData.get('pais'),
+                    region: formData.get('region'),
+                    proveedor_telefonia: formData.get('proveedor_telefonia'),
+                    telefonia_cliente: formData.get('telefonia_cliente'),
+                    requerimientos_especiales: formData.get('requerimientos_especiales')
+                };
+
+                try {
+                    const id = document.getElementById('customerId').value;
+                    let savedCustomerId;
+
+                    if (id) {
+                        // Update existing
+                        const { error } = await supabase
+                            .from('customer_onboarding')
+                            .update(data)
+                            .eq('id', id);
+
+                        if (error) throw error;
+                        savedCustomerId = parseInt(id);
+                        currentCustomerId = savedCustomerId;
+                    } else {
+                        // Insert new
+                        const { data: newData, error } = await supabase
+                            .from('customer_onboarding')
+                            .insert([data])
+                            .select()
+                            .single();
+
+                        if (error) throw error;
+                        savedCustomerId = newData.id;
+                        currentCustomerId = savedCustomerId;
+                    }
+
+                    // Handle file uploads
+                    const fileInput = document.getElementById('call_recordings');
+                    if (fileInput.files.length > 0) {
+                        const files = Array.from(fileInput.files).slice(0, 10); // Max 10 files
+                        const uploadedFiles = await uploadFiles(files, savedCustomerId);
+
+                        // Get existing recordings
+                        const customer = customers.find(c => c.id === savedCustomerId);
+                        const existingRecordings = customer?.call_recordings || [];
+                        const allRecordings = [...existingRecordings, ...uploadedFiles];
+
+                        // Update with recordings
+                        await supabase
+                            .from('customer_onboarding')
+                            .update({ call_recordings: allRecordings })
+                            .eq('id', savedCustomerId);
+                    }
+
+                    await loadCustomers();
+                    viewCustomer(currentCustomerId);
+                } catch (error) {
+                    console.error('Error saving customer:', error);
+                    alert('Error saving customer: ' + error.message);
+                }
+            });
+        }
+
+        // Show specific view
+        function showView(viewId) {
+            document.querySelectorAll('.view-mode').forEach(view => {
+                view.classList.remove('active');
+            });
+            document.getElementById(viewId).classList.add('active');
+        }
+    </script>
+</body>
+</html>
